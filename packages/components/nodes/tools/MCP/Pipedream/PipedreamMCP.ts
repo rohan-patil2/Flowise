@@ -280,7 +280,6 @@ class Pipedream_MCP implements INode {
 
         let externalUserId = nodeData.inputs?.externalUserId as string
         externalUserId = await this.resolveVarsInString(externalUserId, nodeData, options)
-        console.info(`externalUserId [resolveVarsInString]: ${externalUserId}`)
 
         if (externalUserId.includes('{{')) {
             if (!isLoadMethod) {
@@ -296,7 +295,6 @@ class Pipedream_MCP implements INode {
         }
 
         externalUserId = externalUserId.replace(/<[^>]*>/g, '').trim()
-        console.info(`externalUserId: ${externalUserId}`)
         if (!externalUserId) {
             throw new Error('Pipedream user ID is required')
         }
