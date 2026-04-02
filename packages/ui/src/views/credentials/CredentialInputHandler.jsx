@@ -15,7 +15,7 @@ import { TooltipWithParser } from '@/ui-component/tooltip/TooltipWithParser'
 
 // ===========================|| NodeInputHandler ||=========================== //
 
-const CredentialInputHandler = ({ inputParam, data, disabled = false }) => {
+const CredentialInputHandler = ({ inputParam, data, disabled = false, onDataChange }) => {
     const customization = useSelector((state) => state.customization)
     const ref = useRef(null)
 
@@ -116,7 +116,16 @@ const CredentialInputHandler = ({ inputParam, data, disabled = false }) => {
                                 disabled={disabled}
                                 name={inputParam.name}
                                 options={inputParam.options}
-                                onSelect={(newValue) => (data[inputParam.name] = newValue)}
+                                onSelect={(newValue) => {
+                                    data[inputParam.name] = newValue
+                                    if (inputParam.autoPopulate && inputParam.autoPopulate[newValue]) {
+                                        const preset = inputParam.autoPopulate[newValue]
+                                        Object.entries(preset).forEach(([field, value]) => {
+                                            data[field] = value
+                                        })
+                                        if (onDataChange) onDataChange({ ...data })
+                                    }
+                                }}
                                 value={data[inputParam.name] ?? inputParam.default ?? 'choose an option'}
                             />
                         )}
@@ -131,7 +140,8 @@ CredentialInputHandler.propTypes = {
     inputAnchor: PropTypes.object,
     inputParam: PropTypes.object,
     data: PropTypes.object,
-    disabled: PropTypes.bool
+    disabled: PropTypes.bool,
+    onDataChange: PropTypes.func
 }
 
 export default CredentialInputHandler
