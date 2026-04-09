@@ -1,12 +1,8 @@
-import { SpanStatusCode } from '@opentelemetry/api'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { InMemorySpanExporter, SimpleSpanProcessor, ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import { Serialized } from '@langchain/core/load/serializable'
-import {
-    OtelLangChainCallbackHandler,
-    RESERVED_ATTRIBUTE_KEYS,
-    isReservedAttributeKey
-} from '../../../src/analyticsHandlers/otel/OtelLangChainCallbackHandler'
+import { SpanStatusCode } from '@opentelemetry/api'
+import { InMemorySpanExporter, ReadableSpan, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { OtelLangChainCallbackHandler, RESERVED_ATTRIBUTE_KEYS, isReservedAttributeKey } from './OtelLangChainCallbackHandler'
 
 function serialized(idPath: string[], extra?: Record<string, any>): Serialized {
     return { lc: 1, id: idPath, type: 'not_implemented', ...extra } as Serialized

@@ -1,15 +1,11 @@
-import { OtelDestinationConfigSchema } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
-import {
-    createExporterForDestination,
-    createTracerProvider,
-    sanitizeError
-} from '../../../src/analyticsHandlers/otel/OtelDestinationFactory'
-import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto'
 import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc'
+import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
-import type { OtelDestinationConfig } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
 import { version as FLOWISE_VERSION } from '../../../package.json'
+import type { OtelDestinationConfig } from './OtelConfigSchema'
+import { OtelDestinationConfigSchema } from './OtelConfigSchema'
+import { createExporterForDestination, createTracerProvider, sanitizeError } from './OtelDestinationFactory'
 
 // ---------------------------------------------------------------------------
 // OtelDestinationConfigSchema defaults

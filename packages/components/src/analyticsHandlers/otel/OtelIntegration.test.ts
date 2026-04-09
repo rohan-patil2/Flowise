@@ -1,10 +1,10 @@
-import { SpanStatusCode } from '@opentelemetry/api'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { InMemorySpanExporter, SimpleSpanProcessor, ReadableSpan } from '@opentelemetry/sdk-trace-base'
 import { Serialized } from '@langchain/core/load/serializable'
-import { OtelLangChainCallbackHandler } from '../../../src/analyticsHandlers/otel/OtelLangChainCallbackHandler'
-import { OtelTracerProviderPool } from '../../../src/analyticsHandlers/otel/OtelTracerProviderPool'
-import { getCallbackHandler } from '../../../src/analyticsHandlers/otel/OtelAnalyticsProvider'
+import { SpanStatusCode } from '@opentelemetry/api'
+import { InMemorySpanExporter, ReadableSpan, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { getCallbackHandler } from './OtelAnalyticsProvider'
+import { OtelLangChainCallbackHandler } from './OtelLangChainCallbackHandler'
+import { OtelTracerProviderPool } from './OtelTracerProviderPool'
 
 // ---------------------------------------------------------------------------
 // Mock createTracerProvider so tests don't create real exporters / network connections.

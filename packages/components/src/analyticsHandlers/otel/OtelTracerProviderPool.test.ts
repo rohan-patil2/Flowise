@@ -1,7 +1,7 @@
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { OtelTracerProviderPool } from '../../../src/analyticsHandlers/otel/OtelTracerProviderPool'
-import { OtelDestinationConfigSchema } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
-import type { OtelDestinationConfig } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
+import type { OtelDestinationConfig } from './OtelConfigSchema'
+import { OtelDestinationConfigSchema } from './OtelConfigSchema'
+import { OtelTracerProviderPool } from './OtelTracerProviderPool'
 
 // Mock createTracerProvider so tests don't create real exporters / network connections.
 // Each call returns a fresh NodeTracerProvider with forceFlush/shutdown spied on.
