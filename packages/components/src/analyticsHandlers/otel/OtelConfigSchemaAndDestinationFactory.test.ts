@@ -1,14 +1,10 @@
-import { OtelDestinationConfigSchema } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
-import {
-    createExporterForDestination,
-    createTracerProvider,
-    sanitizeError
-} from '../../../src/analyticsHandlers/otel/OtelDestinationFactory'
+import { OtelDestinationConfigSchema } from './OtelConfigSchema'
+import { createExporterForDestination, createTracerProvider, sanitizeError } from './OtelDestinationFactory'
 import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto'
 import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
-import type { OtelDestinationConfig } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
+import type { OtelDestinationConfig } from './OtelConfigSchema'
 import { version as FLOWISE_VERSION } from '../../../package.json'
 
 // ---------------------------------------------------------------------------
@@ -62,6 +58,27 @@ describe('OtelDestinationConfigSchema', () => {
 
     it('rejects ftp:// protocol', () => {
         expect(() => OtelDestinationConfigSchema.parse({ endpoint: 'ftp://example.com/data' })).toThrow(/http:\/\/ or https:\/\//)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// OpenTelemetry credential vendor preset endpoints pass schema validation
+//
+// Regression guard: preset endpoints must be real URLs that satisfy
+// z.string().url(). Placeholder syntax like <account> or <region> would throw
+// a ZodError the first time a user selected the preset without editing it.
+// ---------------------------------------------------------------------------
+
+describe('OpenTelemetry credential vendor presets', () => {
+    const { credClass: OpenTelemetryApi } = require('../../../credentials/OpenTelemetryApi.credential')
+    const cred = new OpenTelemetryApi()
+    const vendorPresetInput = cred.inputs.find((input: { name: string }) => input.name === 'otelVendorPreset')
+    const autoPopulate = vendorPresetInput?.autoPopulate
+    if (!autoPopulate) throw new Error('OpenTelemetry vendor preset input must define autoPopulate')
+
+    it.each(Object.keys(autoPopulate))('preset %s endpoint parses against OtelDestinationConfigSchema', (preset) => {
+        const endpoint = autoPopulate[preset].otelEndpoint
+        expect(() => OtelDestinationConfigSchema.parse({ endpoint })).not.toThrow()
     })
 })
 

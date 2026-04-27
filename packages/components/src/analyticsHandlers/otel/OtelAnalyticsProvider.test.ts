@@ -1,7 +1,7 @@
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { OtelTracerProviderPool } from '../../../src/analyticsHandlers/otel/OtelTracerProviderPool'
-import { buildDestinationConfig, getCallbackHandler } from '../../../src/analyticsHandlers/otel/OtelAnalyticsProvider'
-import { OtelLangChainCallbackHandler } from '../../../src/analyticsHandlers/otel/OtelLangChainCallbackHandler'
+import { OtelTracerProviderPool } from './OtelTracerProviderPool'
+import { buildDestinationConfig, getCallbackHandler } from './OtelAnalyticsProvider'
+import { OtelLangChainCallbackHandler } from './OtelLangChainCallbackHandler'
 
 const mockTracer = { startSpan: jest.fn() }
 const mockForceFlush = jest.fn().mockResolvedValue(undefined)

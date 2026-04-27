@@ -11,8 +11,26 @@ interface PoolEntry {
     configHash: string
 }
 
+/**
+ * Recursively produce a JSON string with object keys sorted at every level.
+ * This ensures deterministic output regardless of key insertion order, while
+ * preserving all nested values (unlike `JSON.stringify(obj, topLevelKeys)`,
+ * which uses its second argument as a filter and strips nested properties).
+ */
+function stableStringify(value: unknown): string {
+    if (value === null || typeof value !== 'object') {
+        return JSON.stringify(value)
+    }
+    if (Array.isArray(value)) {
+        return '[' + value.map((v) => stableStringify(v)).join(',') + ']'
+    }
+    const obj = value as Record<string, unknown>
+    const keys = Object.keys(obj).sort()
+    return '{' + keys.map((k) => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') + '}'
+}
+
 function computeConfigHash(config: OtelDestinationConfig): string {
-    const normalized = JSON.stringify(config, Object.keys(config).sort())
+    const normalized = stableStringify(config)
     return createHash('sha256').update(normalized).digest('hex')
 }
 

@@ -8,22 +8,22 @@ const VENDOR_PRESETS: Record<string, { endpoint: string; protocol: string; heade
         headerValueHint: 'your-new-relic-ingest-key'
     },
     datadog: {
-        endpoint: 'http://<datadog-agent-host>:4318/v1/traces',
+        endpoint: 'http://your-datadog-agent-host:4318/v1/traces',
         protocol: 'http/protobuf',
         headerKey: 'dd-api-key',
         headerValueHint: 'your-datadog-api-key'
     },
     logicmonitor: {
-        endpoint: 'https://<account>.logicmonitor.com/rest/api/v1/traces',
+        endpoint: 'https://your-account.logicmonitor.com/rest/api/v1/traces',
         protocol: 'http/protobuf',
         headerKey: 'Authorization',
-        headerValueHint: 'Bearer <token>'
+        headerValueHint: 'Bearer your-logicmonitor-bearer-token'
     },
     grafana: {
-        endpoint: 'https://otlp-gateway-<region>.grafana.net/otlp/v1/traces',
+        endpoint: 'https://otlp-gateway-prod-us-east-0.grafana.net/otlp/v1/traces',
         protocol: 'http/protobuf',
         headerKey: 'Authorization',
-        headerValueHint: 'Basic <base64(instanceId:apiToken)>'
+        headerValueHint: 'Basic your-base64-encoded-instance-id-and-api-token'
     }
 }
 
@@ -54,40 +54,41 @@ class OpenTelemetryApi implements INodeCredential {
                     { label: 'Grafana Cloud', name: 'grafana' }
                 ],
                 default: 'custom',
-                ...({
-                    autoPopulate: {
-                        newrelic: {
-                            otelEndpoint: VENDOR_PRESETS.newrelic.endpoint,
-                            otelProtocol: VENDOR_PRESETS.newrelic.protocol,
-                            otelHeaderKey: VENDOR_PRESETS.newrelic.headerKey,
-                            otelHeaderValue: VENDOR_PRESETS.newrelic.headerValueHint
-                        },
-                        datadog: {
-                            otelEndpoint: VENDOR_PRESETS.datadog.endpoint,
-                            otelProtocol: VENDOR_PRESETS.datadog.protocol,
-                            otelHeaderKey: VENDOR_PRESETS.datadog.headerKey,
-                            otelHeaderValue: VENDOR_PRESETS.datadog.headerValueHint
-                        },
-                        logicmonitor: {
-                            otelEndpoint: VENDOR_PRESETS.logicmonitor.endpoint,
-                            otelProtocol: VENDOR_PRESETS.logicmonitor.protocol,
-                            otelHeaderKey: VENDOR_PRESETS.logicmonitor.headerKey,
-                            otelHeaderValue: VENDOR_PRESETS.logicmonitor.headerValueHint
-                        },
-                        grafana: {
-                            otelEndpoint: VENDOR_PRESETS.grafana.endpoint,
-                            otelProtocol: VENDOR_PRESETS.grafana.protocol,
-                            otelHeaderKey: VENDOR_PRESETS.grafana.headerKey,
-                            otelHeaderValue: VENDOR_PRESETS.grafana.headerValueHint
-                        }
+                autoPopulate: {
+                    newrelic: {
+                        otelEndpoint: VENDOR_PRESETS.newrelic.endpoint,
+                        otelProtocol: VENDOR_PRESETS.newrelic.protocol,
+                        otelHeaderKey: VENDOR_PRESETS.newrelic.headerKey,
+                        otelHeaderValue: VENDOR_PRESETS.newrelic.headerValueHint
+                    },
+                    datadog: {
+                        otelEndpoint: VENDOR_PRESETS.datadog.endpoint,
+                        otelProtocol: VENDOR_PRESETS.datadog.protocol,
+                        otelHeaderKey: VENDOR_PRESETS.datadog.headerKey,
+                        otelHeaderValue: VENDOR_PRESETS.datadog.headerValueHint
+                    },
+                    logicmonitor: {
+                        otelEndpoint: VENDOR_PRESETS.logicmonitor.endpoint,
+                        otelProtocol: VENDOR_PRESETS.logicmonitor.protocol,
+                        otelHeaderKey: VENDOR_PRESETS.logicmonitor.headerKey,
+                        otelHeaderValue: VENDOR_PRESETS.logicmonitor.headerValueHint
+                    },
+                    grafana: {
+                        otelEndpoint: VENDOR_PRESETS.grafana.endpoint,
+                        otelProtocol: VENDOR_PRESETS.grafana.protocol,
+                        otelHeaderKey: VENDOR_PRESETS.grafana.headerKey,
+                        otelHeaderValue: VENDOR_PRESETS.grafana.headerValueHint
                     }
-                } as any)
+                }
             },
             {
                 label: 'Endpoint',
                 name: 'otelEndpoint',
                 type: 'string',
-                placeholder: 'https://otlp.nr-data.net:4318/v1/traces'
+                placeholder: 'https://otlp.nr-data.net:4318/v1/traces',
+                description:
+                    'Full OTLP traces endpoint URL. When a vendor preset is selected, adjust vendor-specific parts as needed ' +
+                    '(e.g. the Datadog Agent host, your LogicMonitor account subdomain, or your Grafana Cloud region).'
             },
             {
                 label: 'Protocol',

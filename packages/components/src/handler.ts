@@ -798,8 +798,8 @@ export class AnalyticHandler {
     ): void {
         const llmSpan: Span | undefined = this.handlers[providerName]?.llmSpan?.[returnIds[providerName]?.llmSpan]
         if (llmSpan) {
-            llmSpan.setAttribute('output.value', JSON.stringify(outputText))
-            llmSpan.setAttribute('output.mime_type', 'application/json')
+            llmSpan.setAttribute('output.value', outputText)
+            llmSpan.setAttribute('output.mime_type', 'text/plain')
             if (usageMetadata) {
                 if (usageMetadata.input_tokens !== undefined) {
                     llmSpan.setAttribute('llm.token_count.prompt', usageMetadata.input_tokens)
@@ -2165,20 +2165,23 @@ export class AnalyticHandler {
                 const isRetrieval = this.handlers['openTelemetry'].retrievalSpanIds?.[spanId] === true
                 const startTime = this.handlers['openTelemetry'].toolStartTime?.[spanId]
 
+                const isString = typeof output === 'string'
+                const outputStr = isString ? output : JSON.stringify(output)
+                const mimeType = isString ? 'text/plain' : 'application/json'
+
                 if (isRetrieval) {
-                    const outputStr = typeof output === 'string' ? output : JSON.stringify(output)
                     let numResults: number | undefined
                     try {
-                        const parsed = typeof output === 'string' ? JSON.parse(output) : output
+                        const parsed = isString ? JSON.parse(output) : output
                         if (Array.isArray(parsed)) {
                             numResults = parsed.length
                         }
                     } catch {
-                        // output is not parseable; leave numResults undefined
+                        // output is not a valid JSON string; leave numResults undefined
                     }
 
                     toolSpan.setAttribute('output.value', outputStr)
-                    toolSpan.setAttribute('output.mime_type', 'application/json')
+                    toolSpan.setAttribute('output.mime_type', mimeType)
                     toolSpan.setAttribute('retrieval.documents', outputStr)
                     if (numResults !== undefined) {
                         toolSpan.setAttribute('retrieval.num_results', numResults)
@@ -2188,9 +2191,9 @@ export class AnalyticHandler {
                     }
                     delete this.handlers['openTelemetry'].retrievalSpanIds?.[spanId]
                 } else {
-                    toolSpan.setAttribute('output.value', JSON.stringify(output))
-                    toolSpan.setAttribute('output.mime_type', 'application/json')
-                    toolSpan.setAttribute('tool.output', JSON.stringify(output))
+                    toolSpan.setAttribute('output.value', outputStr)
+                    toolSpan.setAttribute('output.mime_type', mimeType)
+                    toolSpan.setAttribute('tool.output', outputStr)
                     if (startTime !== undefined) {
                         toolSpan.setAttribute('tool.latency_ms', Date.now() - startTime)
                     }

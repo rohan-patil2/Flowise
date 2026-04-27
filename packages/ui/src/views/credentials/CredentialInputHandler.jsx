@@ -15,6 +15,17 @@ import { TooltipWithParser } from '@/ui-component/tooltip/TooltipWithParser'
 
 // ===========================|| NodeInputHandler ||=========================== //
 
+export const applyCredentialOptionSelection = (inputParam, data, newValue, onDataChange) => {
+    data[inputParam.name] = newValue
+    if (inputParam.autoPopulate && inputParam.autoPopulate[newValue]) {
+        const preset = inputParam.autoPopulate[newValue]
+        Object.entries(preset).forEach(([field, value]) => {
+            data[field] = value
+        })
+        if (onDataChange) onDataChange({ ...data })
+    }
+}
+
 const CredentialInputHandler = ({ inputParam, data, disabled = false, onDataChange }) => {
     const customization = useSelector((state) => state.customization)
     const ref = useRef(null)
@@ -117,14 +128,7 @@ const CredentialInputHandler = ({ inputParam, data, disabled = false, onDataChan
                                 name={inputParam.name}
                                 options={inputParam.options}
                                 onSelect={(newValue) => {
-                                    data[inputParam.name] = newValue
-                                    if (inputParam.autoPopulate && inputParam.autoPopulate[newValue]) {
-                                        const preset = inputParam.autoPopulate[newValue]
-                                        Object.entries(preset).forEach(([field, value]) => {
-                                            data[field] = value
-                                        })
-                                        if (onDataChange) onDataChange({ ...data })
-                                    }
+                                    applyCredentialOptionSelection(inputParam, data, newValue, onDataChange)
                                 }}
                                 value={data[inputParam.name] ?? inputParam.default ?? 'choose an option'}
                             />

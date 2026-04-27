@@ -491,7 +491,11 @@ const AddEditCredentialDialog = ({ show, dialogProps, onCancel, onConfirm, setEr
                     componentCredential &&
                     componentCredential.inputs &&
                     componentCredential.inputs
-                        .filter((inputParam) => inputParam.hidden !== true && !inputParam.additionalParams)
+                        .filter(
+                            (inputParam) =>
+                                inputParam.hidden !== true &&
+                                (componentCredential.name !== 'openTelemetryApi' || !inputParam.additionalParams)
+                        )
                         .map((inputParam, index) => (
                             <CredentialInputHandler
                                 key={index}
@@ -502,6 +506,7 @@ const AddEditCredentialDialog = ({ show, dialogProps, onCancel, onConfirm, setEr
                         ))}
                 {!shared &&
                     componentCredential &&
+                    componentCredential.name === 'openTelemetryApi' &&
                     componentCredential.inputs &&
                     componentCredential.inputs.some((inputParam) => inputParam.hidden !== true && inputParam.additionalParams) && (
                         <Box sx={{ p: 2 }}>

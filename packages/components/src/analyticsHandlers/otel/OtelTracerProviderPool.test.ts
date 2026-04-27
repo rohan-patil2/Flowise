@@ -1,7 +1,7 @@
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { OtelTracerProviderPool } from '../../../src/analyticsHandlers/otel/OtelTracerProviderPool'
-import { OtelDestinationConfigSchema } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
-import type { OtelDestinationConfig } from '../../../src/analyticsHandlers/otel/OtelConfigSchema'
+import { OtelTracerProviderPool } from './OtelTracerProviderPool'
+import { OtelDestinationConfigSchema } from './OtelConfigSchema'
+import type { OtelDestinationConfig } from './OtelConfigSchema'
 
 // Mock createTracerProvider so tests don't create real exporters / network connections.
 // Each call returns a fresh NodeTracerProvider with forceFlush/shutdown spied on.
@@ -78,6 +78,39 @@ describe('OtelTracerProviderPool', () => {
         const tracer2 = await pool.getOrCreate('flow-1', config2)
 
         expect(tracer2).not.toBe(tracer1)
+        expect(pool.size).toBe(1)
+    })
+
+    // -----------------------------------------------------------------------
+    // Regression: nested config differences (e.g. auth headers) must be
+    // reflected in the hash. Previously `JSON.stringify(config, topLevelKeys)`
+    // was used as a replacer, which stripped all nested values and caused two
+    // configs with different headers to collide on the same hash.
+    // -----------------------------------------------------------------------
+
+    it('treats configs with different nested headers as distinct (hash must not collide)', async () => {
+        const config1 = makeConfig({ headers: { Authorization: 'Bearer tenant-a-token' } })
+        const tracer1 = await pool.getOrCreate('flow-1', config1)
+
+        const config2 = makeConfig({ headers: { Authorization: 'Bearer tenant-b-token' } })
+        const tracer2 = await pool.getOrCreate('flow-1', config2)
+
+        expect(tracer2).not.toBe(tracer1)
+        expect(mockForceFlush).toHaveBeenCalledTimes(1)
+        expect(mockShutdown).toHaveBeenCalledTimes(1)
+        expect(pool.size).toBe(1)
+    })
+
+    it('treats header key-order differences as the same config (stable hash)', async () => {
+        const config1 = makeConfig({ headers: { Authorization: 'Bearer t', 'X-Tenant': 'a' } })
+        const tracer1 = await pool.getOrCreate('flow-1', config1)
+
+        const config2 = makeConfig({ headers: { 'X-Tenant': 'a', Authorization: 'Bearer t' } })
+        const tracer2 = await pool.getOrCreate('flow-1', config2)
+
+        expect(tracer2).toBe(tracer1)
+        expect(mockForceFlush).not.toHaveBeenCalled()
+        expect(mockShutdown).not.toHaveBeenCalled()
         expect(pool.size).toBe(1)
     })
 
