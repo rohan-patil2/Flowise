@@ -30,6 +30,7 @@ import {
     getCallbackHandler as getOtelCallbackHandler,
     buildDestinationConfig as buildOtelDestConfig
 } from './analyticsHandlers/otel/OtelAnalyticsProvider'
+import { sanitizeError } from './analyticsHandlers/otel/OtelDestinationFactory'
 import { OtelTracerProviderPool } from './analyticsHandlers/otel/OtelTracerProviderPool'
 import { isReservedAttributeKey } from './analyticsHandlers/otel/OtelLangChainCallbackHandler'
 import { EvaluationRunTracer } from '../evaluation/EvaluationRunTracer'
@@ -717,17 +718,21 @@ export const additionalCallbacks = async (nodeData: INodeData, options: ICommonO
                     const tracer: Tracer | undefined = getOpikTracer(opikOptions)
                     callbacks.push(tracer)
                 } else if (provider === 'openTelemetry') {
-                    const handler = await getOtelCallbackHandler(
-                        options.chatflowid ?? options.chatflowId ?? '',
-                        analytic[provider],
-                        credentialData,
-                        {
-                            chatId: options.chatId,
-                            spanAttributes: analytic[provider].spanAttributes,
-                            overrideConfig: nodeData?.inputs
-                        }
-                    )
-                    callbacks.push(handler)
+                    try {
+                        const handler = await getOtelCallbackHandler(
+                            options.chatflowid ?? options.chatflowId ?? '',
+                            analytic[provider],
+                            credentialData,
+                            {
+                                chatId: options.chatId,
+                                spanAttributes: analytic[provider].spanAttributes,
+                                overrideConfig: nodeData?.inputs
+                            }
+                        )
+                        callbacks.push(handler)
+                    } catch (error) {
+                        console.warn(`[OTEL] Skipping OpenTelemetry callback setup: ${sanitizeError(error)}`)
+                    }
                 }
             }
         }
