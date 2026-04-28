@@ -129,7 +129,8 @@ class AWSBedrockEmbedding_Embeddings implements INode {
         const customModel = nodeData.inputs?.customModel as string
         const inputType = nodeData.inputs?.inputType as string
         const endpointHost = (nodeData.inputs?.endpointHost as string)?.trim()
-        const effectiveModel = customModel ? customModel : iModel
+        const effectiveModel = customModel || iModel
+        if (!effectiveModel) throw new Error('Model ID is required')
 
         if (effectiveModel.startsWith('cohere') && !inputType) {
             throw new Error('Input Type must be selected for Cohere models.')
